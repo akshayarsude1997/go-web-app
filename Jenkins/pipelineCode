@@ -33,7 +33,7 @@ pipeline{
             sh "sudo docker container prune -f"
             
             // Define the image tag using Jenkins build number
-            def imageTag = "${docker_hub_username}/go-web-app-new-image:${BUILD_NUMBER}"
+            def imageTag = "${docker_hub_username}/go-web-app-new-image:${BUILD_NUMBER}" //check the image name
 
             // Build the Docker image with the build number as the tag
             sh "sudo docker build -t ${imageTag} ."
