@@ -1,0 +1,86 @@
+pipeline{
+    agent {
+        label "workA"
+    }
+    tools{
+        go "go"
+    }
+    
+     environment{
+        docker_hub_username= "akshayarsude1997"
+        docker_hub_password = ""
+     }
+    
+    stages{
+        // stage("Cleaning  Workspace"){
+        //     steps{
+        //         CleanWs()
+        //     }
+        // }
+        
+        stage("git checkout"){
+            steps{
+                git credentialsId: "GITHUB-APP", url: "https://github.com/akshayarsude1997/go-web-app.git", branch: "main"
+            }
+        }
+        
+        stage("docker image build"){
+            steps{
+                script{
+                   stage("docker image build and push") {
+                        // Clean up docker system and containers
+            sh "sudo docker system prune -f"
+            sh "sudo docker container prune -f"
+            
+            // Define the image tag using Jenkins build number
+            def imageTag = "${docker_hub_username}/go-web-app-new-image:${BUILD_NUMBER}"
+
+            // Build the Docker image with the build number as the tag
+            sh "sudo docker build -t ${imageTag} ."
+
+            // Log in to Docker Hub
+            sh "echo ${docker_hub_password} | sudo docker login -u ${docker_hub_username} --password-stdin"
+
+            // Push the image to Docker Hub
+            sh "sudo docker push ${imageTag}"
+                    }  
+
+                }
+            }
+        }
+        
+        stage("update the github repository"){
+            environment{
+                GIT_REPO_NAME = "https://github.com/akshayarsude1997/go-web-app.git"
+                GIT_USER_NAME = "akshayarsude1997"
+            }
+            steps{
+                dir("k8s/go-web-app-chart"){
+                    withCredentials([usernamePassword(credentialsId: 'GITHUB-APP', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                    # Set git user information
+                    git config user.email "akshayarsude1997@gmail.com"
+                    git config user.name "akshayarsude1997"
+                    
+                    # Get the build number
+                    BUILD_NUMBER=${BUILD_NUMBER}
+                    echo "Current BUILD_NUMBER: $BUILD_NUMBER"
+                    
+                    # Extract the current tag from values.yaml
+                    imageTag=$(grep -oP "(?<=tag:\\s)[^\\n]+" values.yaml)
+                    echo "Current image tag: $imageTag"
+                    
+                    # Replace the tag value with the build number
+                    sed -i "s/tag: ${imageTag}/tag: ${BUILD_NUMBER}/" values.yaml
+                    
+                    # Commit and push the changes
+                    git add values.yaml
+                    git commit -m "Update Image tag in values.yaml to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/go-web-app.git HEAD:main
+                '''
+                    }
+                }
+            }
+        }
+    }
+}
