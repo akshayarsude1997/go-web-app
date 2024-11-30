@@ -1,5 +1,5 @@
 # Image configuration
 image:
   repository: akshayarsude1997/new-go-image
-  tag: 20
+  tag: 1
   pullPolicy: IfNotPresent # Image pull policy (can be Always, IfNotPresent, Never)
