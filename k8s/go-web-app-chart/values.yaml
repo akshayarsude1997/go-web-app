@@ -1,5 +1,5 @@
 # Image configuration
 image:
   repository: akshayarsude1997/new-go-image
-  tag: latest # You can specify a tag or use "latest" by default.
+  tag: 20
   pullPolicy: IfNotPresent # Image pull policy (can be Always, IfNotPresent, Never)
