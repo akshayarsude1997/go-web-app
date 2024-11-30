@@ -8,7 +8,7 @@ pipeline{
     
      environment{
         docker_hub_username= "akshayarsude1997"
-        docker_hub_password = ""
+        docker_hub_password = "" //give the password 
      }
     
     stages{
