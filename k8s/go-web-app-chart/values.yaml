@@ -1,5 +1,5 @@
 # Image configuration
 image:
   repository: akshayarsude1997/go-web-app-new-image
-  tag: 1
+  tag: 4
   pullPolicy: IfNotPresent # Image pull policy (can be Always, IfNotPresent, Never)
